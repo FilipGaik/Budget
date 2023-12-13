@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block body %}
+  <main>
+    <section class="menu balance">
+      <h2>Settings</h2>
+
+      <div class="accordion" id="accordionIncomes">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingIncomes">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIncomes" aria-expanded="false" aria-controls="collapseIncomes"
+            style="background-color: #643843; color: #e7cbcb;">
+              <h3>Incomes categories</h3>
+            </button>
+          </h2>
+          <div id="collapseIncomes" class="accordion-collapse collapse" aria-labelledby="headingIncomes" data-bs-parent="#accordionIncomes">
+            <div class="accordion-body" style="background-color: #643843; color: #e7cbcb;">
+              <form action="/settings/addIncomeCategory" method="post">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModalIncomeCategory" style="margin: 10px 0 20px;">Add new</button>
+                <!-- Modal -->
+                <div id="addModalIncomeCategory" class="modal fade" tabindex="-1" aria-labelledby="addModalIncomeCategoryLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header" style="background-color: #e7cbcb;">
+                        <h5 class="modal-title" id="addModalIncomeCategoryLabel" style="color: #643843;">Add new income category</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body" style="background-color: #dbdfaa;">
+                        <div class="menu" style="
+                        margin-top: 0px; padding: 5px 0 0 15px;">
+                          <input class="comment" type="text" name="incomeCategory" placeholder="Enter new income category name" required>
+                          <br>
+                        </div>
+                      </div>
+                      <div class="modal-footer" style="background-color: #e7cbcb;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add income category</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+              {% for i in incomesCategories %}
+                <div style="border-radius: 20px; padding-top: 10px; margin-bottom: 20px; background-color: #e7cbcb;">
+                  <h4 style="color: #643843;">{{ i.name }}</h4>
+                  <form action="/settings/renameIncomeCategory" method="post" style="display: inline-block;">
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#renameModalIncomeCategory{{ i.id }}" style="margin-right: 20px;">Rename</button>
+                    <!-- Modal -->
+                    <div id="renameModalIncomeCategory{{ i.id }}" class="modal fade" tabindex="-1" aria-labelledby="renameModalIncomeCategory{{ i.id }}Label" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header" style="background-color: #e7cbcb;">
+                            <h5 class="modal-title" id="renameModalIncomeCategory{{ i.id }}Label" style="color: #643843;">Rename income category</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body" style="background-color: #dbdfaa;">
+                            <div class="menu" style="
+                            margin-top: 0px; padding: 5px 0 0 15px;">
+                              <input class="comment" type="text" name="incomeCategory" value="{{ i.name }}" required>
+                              <input type="hidden" name="incomeCategoryId" value="{{ i.id }}">
+                              <br>
+                            </div>
+                          </div>
+                          <div class="modal-footer" style="background-color: #e7cbcb;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Rename</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+
+                  <form action="/settings/deleteIncomeCategory" method="post" style="display: inline-block; margin: 10px 0 20px;">
+                    <button type="button" class="btn btn-danger incomeCategoryDeleteBtn" id="incomeCategoryDelBtn{{ i.id }}" data-bs-toggle="modal" data-bs-target="#deleteModalIncome{{ i.id }}">Delete</button>
+                    <!-- Modal -->
+                    <div id="deleteModalIncome{{ i.id }}" class="modal fade" tabindex="-1" aria-labelledby="deleteModalIncome{{ i.id }}Label" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header" style="background-color: #e7cbcb;">
+                            <h5 class="modal-title" id="deleteModalIncome{{ i.id }}Label" style="color: #643843;">Delete income category</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body" style="background-color: #dbdfaa">
+                            <h4 id="incomeCat-h4-{{ i.id }}" style="color: #643843;">Attention!</h4>
+                            <p id="incomeCat-p-{{ i.id }}" style="color: #643843;">You have incomes assigned to this category and they will be deleted too.</p>
+                            <p style="color: #643843;">Are you sure you want to delete?</p>
+                          </div>
+                          <div class="modal-footer" style="background-color: #e7cbcb;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" name="incomeCategoryId" value="{{ i.id }}" class="btn btn-danger">Delete</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion" id="accordionExpenses">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingExpenses">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExpenses" aria-expanded="false" aria-controls="collapseExpenses"
+            style="background-color: #643843; color: #e7cbcb;">
+              <h3>Expenses categories</h3>
+            </button>
+          </h2>
+          <div id="collapseExpenses" class="accordion-collapse collapse" aria-labelledby="headingExpenses" data-bs-parent="#accordionExpenses">
+            <div class="accordion-body" style="background-color: #643843; color: #e7cbcb;">
+              <form action="/settings/addExpenseCategory" method="post">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModalExpenseCategory" style="margin: 10px 0 20px;">Add new</button>
+                <!-- Modal -->
+                <div id="addModalExpenseCategory" class="modal fade" tabindex="-1" aria-labelledby="addModalExpenseCategoryLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header" style="background-color: #e7cbcb;">
+                        <h5 class="modal-title" id="addModalExpenseCategoryLabel" style="color: #643843;">Add new expense category</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body" style="background-color: #dbdfaa;">
+                        <div class="menu" style="
+                        margin-top: 0px; padding: 5px 0 0 15px;">
+                          <input class="comment" type="text" name="expenseCategory" placeholder="Enter new expense category name" required>
+                          <br>
+                        </div>
+                      </div>
+                      <div class="modal-footer" style="background-color: #e7cbcb;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add expense category</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+              {% for i in expensesCategories %}
+                <div style="border-radius: 20px; padding-top: 10px; margin-bottom: 20px; background-color: #e7cbcb;">
+                  <h4 style="color: #643843;">{{ i.name }}</h4>
+                  {% if i.limit > 0 %}
+                    <p style="color: #643843;">Limit: {{ i.limit }}</p>
+                  {% endif %}
+                  <form action="/settings/renameExpenseCategory" method="post" style="display: inline-block;">
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#renameModalExpenseCategory{{ i.id }}" style="margin-right: 20px;">Edit</button>
+                    <!-- Modal -->
+                    <div id="renameModalExpenseCategory{{ i.id }}" class="modal fade" tabindex="-1" aria-labelledby="renameModalExpenseCategory{{ i.id }}Label" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header" style="background-color: #e7cbcb;">
+                            <h5 class="modal-title" id="renameModalExpenseCategory{{ i.id }}Label" style="color: #643843;">Edit expense category</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body" style="background-color: #dbdfaa;">
+                            <div class="menu" style="
+                            margin-top: 0px; padding: 5px 0 0 15px;">
+                              <p style="display: flex; margin-bottom: 0;">Expense category name:</p>
+                              <input class="comment" type="text" name="expenseCategory" value="{{ i.name }}" style="margin-top: 3px;" required>
+                              <label for="limitOn{{ i.id }}" style="display: flex; margin-top: 20px;">
+                                <input type="checkbox" name="limitOn" id="limitOn{{ i.id }}" class="limitOn" style="margin-right: 5px;" {% if i.limit > 0 %} checked {% endif %}>
+                                Turn on the limit
+                              </label>
+                              <p style="display: flex; margin-bottom: 0;">Set the monthly limit:</p>
+                              <input type="number" min="0.01" step="0.01" name="limitAmount" id="limitAmount{{ i.id }}" style="margin-top: 3px;" {% if i.limit == 0 %} disabled {% else %} value="{{ i.limit }}" {% endif %}>
+                              <input type="hidden" name="expenseCategoryId" value="{{ i.id }}">
+                              <br>
+                            </div>
+                          </div>
+                          <div class="modal-footer" style="background-color: #e7cbcb;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+
+                  <form action="/settings/deleteExpenseCategory" method="post" style="display: inline-block; margin: 10px 0 20px;">
+                    <button type="button" class="btn btn-danger expenseCategoryDeleteBtn" id="expenseCategoryDelBtn{{ i.id }}" data-bs-toggle="modal" data-bs-target="#deleteModalExpense{{ i.id }}">Delete</button>
+                    <!-- Modal -->
+                    <div id="deleteModalExpense{{ i.id }}" class="modal fade" tabindex="-1" aria-labelledby="deleteModalExpense{{ i.id }}Label" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header" style="background-color: #e7cbcb;">
+                            <h5 class="modal-title" id="deleteModalExpense{{ i.id }}Label" style="color: #643843;">Delete expense category</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body" style="background-color: #dbdfaa">
+                            <h4 id="expenseCat-h4-{{ i.id }}" style="color: #643843;">Attention!</h4>
+                            <p id="expenseCat-p-{{ i.id }}" style="color: #643843;">You have expenses assigned to this category and they will be deleted too.</p>
+                            <p style="color: #643843;">Are you sure you want to delete?</p>
+                          </div>
+                          <div class="modal-footer" style="background-color: #e7cbcb;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" name="expenseCategoryId" value="{{ i.id }}" class="btn btn-danger">Delete</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion" id="accordionPayment">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingPayment">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePayment" aria-expanded="false" aria-controls="collapsePayment"
+            style="background-color: #643843; color: #e7cbcb;">
+              <h3>Payment methods</h3>
+            </button>
+          </h2>
+          <div id="collapsePayment" class="accordion-collapse collapse" aria-labelledby="headingPayment" data-bs-parent="#accordionPayment">
+            <div class="accordion-body" style="background-color: #643843; color: #e7cbcb;">
+              <form action="/settings/addPayment" method="post">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModalPayment" style="margin: 10px 0 20px;">Add new</button>
+                <!-- Modal -->
+                <div id="addModalPayment" class="modal fade" tabindex="-1" aria-labelledby="addModalPaymentLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header" style="background-color: #e7cbcb;">
+                        <h5 class="modal-title" id="addModalPaymentLabel" style="color: #643843;">Add new payment method</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body" style="background-color: #dbdfaa;">
+                        <div class="menu" style="
+                        margin-top: 0px; padding: 5px 0 0 15px;">
+                          <input class="comment" type="text" name="payment" placeholder="Enter new payment method name" required>
+                          <br>
+                        </div>
+                      </div>
+                      <div class="modal-footer" style="background-color: #e7cbcb;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add payment method</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+              {% for i in paymentMethods %}
+                <div style="border-radius: 20px; padding-top: 10px; margin-bottom: 20px; background-color: #e7cbcb;">
+                  <h4 style="color: #643843;">{{ i.name }}</h4>
+                  <form action="/settings/renamePayment" method="post" style="display: inline-block;">
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#renameModalPayment{{ i.id }}" style="margin-right: 20px;">Rename</button>
+                    <!-- Modal -->
+                    <div id="renameModalPayment{{ i.id }}" class="modal fade" tabindex="-1" aria-labelledby="renameModalPayment{{ i.id }}Label" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header" style="background-color: #e7cbcb;">
+                            <h5 class="modal-title" id="renameModalPayment{{ i.id }}Label" style="color: #643843;">Rename payment method</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body" style="background-color: #dbdfaa;">
+                            <div class="menu" style="
+                            margin-top: 0px; padding: 5px 0 0 15px;">
+                              <input class="comment" type="text" name="payment" value="{{ i.name }}" required>
+                              <input type="hidden" name="paymentId" value="{{ i.id }}">
+                              <br>
+                            </div>
+                          </div>
+                          <div class="modal-footer" style="background-color: #e7cbcb;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Rename</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                  
+                  <form action="/settings/deletePaymentMethod" method="post" style="display: inline-block; margin: 10px 0 20px;">
+                    <button type="button" class="btn btn-danger paymentDeleteBtn" id="paymentDelBtn{{ i.id }}" data-bs-toggle="modal" data-bs-target="#deleteModalPayment{{ i.id }}">Delete</button>
+                    <!-- Modal -->
+                    <div id="deleteModalPayment{{ i.id }}" class="modal fade" tabindex="-1" aria-labelledby="deleteModalPayment{{ i.id }}Label" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header" style="background-color: #e7cbcb;">
+                            <h5 class="modal-title" id="deleteModalPayment{{ i.id }}Label" style="color: #643843;">Delete payment method</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body" style="background-color: #dbdfaa">
+                            <h4 id="payment-h4-{{ i.id }}" style="color: #643843;">Attention!</h4>
+                            <p id="payment-p-{{ i.id }}" style="color: #643843;">You have expenses assigned to this payment method and they will be deleted too.</p>
+                            <p style="color: #643843;">Are you sure you want to delete?</p>
+                          </div>
+                          <div class="modal-footer" style="background-color: #e7cbcb;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" name="paymentMethodId" value="{{ i.id }}" class="btn btn-danger">Delete</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <form action="/settings/deleteAccount" method="post">
+      <button style="margin: 40px 0; box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.2);" type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModalAccount">Delete account</button>
+      <!-- Modal -->
+      <div id="deleteModalAccount" class="modal fade" tabindex="-1" aria-labelledby="deleteModalAccountLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header" style="background-color: #e7cbcb;">
+              <h5 class="modal-title" id="deleteModalAccountLabel" style="color: #643843;">Delete account</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="background-color: #dbdfaa">
+              <h4 style="color: #643843;">Attention!</h4>
+              <p style="color: #643843;">You are going to delete your account.</p>
+              <p style="color: #643843;">Are you sure you want to delete?</p>
+            </div>
+            <div class="modal-footer" style="background-color: #e7cbcb;">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-danger">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+  </main>
+  <script src="/js/url.js"></script>
+  <script src="/js/checkIfPaymentExpensesAndIncomesCatHaveAssignments.js"></script>
+  <script>
+    // toggle disabled attribute
+    let limitOnButtons = document.getElementsByClassName("limitOn");
+
+    for(let i = 0; i < limitOnButtons.length; i++) {
+      limitOnButtons[i].addEventListener("click", function() {
+        let limitAmountInput = document.getElementById(`limitAmount${limitOnButtons[i].id.slice(7)}`);
+        limitAmountInput.toggleAttribute("disabled");
+      });
+    }
+  </script>
+{% endblock %}

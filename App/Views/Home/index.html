@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block body %}
+  <main>
+    <article>
+      {% if current_user %}
+        <section class="menu">
+          <h2>Welcome {{ current_user.name }}!</h2>
+          <h4>Pick from the options above next action.</h4>
+        </section>
+      {% else %}
+        <div class="reglog">
+          
+          <header>
+            <div>
+              <h2>Take <strong>your money</strong> under control starting today!</h2>
+              <p>Are you sick and tired of <strong>living just day by day?</strong></p>
+              <p>Achieving life <strong>standard is not enough</strong> for you?</p>
+              <p>Do you care about <strong>quality</strong> of your <strong>life?</strong></p>
+              <p>Use <strong>"Finance Manager"</strong> absolutely for free and start spending <strong>your money</strong> consciousnessly.</p>
+            </div>
+          </header>
+
+          <section>
+
+            <div class="reglog-bottom">
+              <p>Don't have an account?</p>
+              <a href="/signup/new">
+                <button class="btn btn-primary">Register for free</button>
+              </a>
+            </div>
+
+            <div class="reglog-bottom">
+              <p>Have an account already?</p>
+              <a href="/login">
+                <button class="btn btn-primary">Log in</button>
+              </a>
+            </div>
+
+          </section>
+
+        </div>
+      {% endif %}
+    </article>
+  </main>
+{% endblock %}

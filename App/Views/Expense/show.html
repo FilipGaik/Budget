@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Add expense{% endblock %}
+
+{% block body %}
+  <main>
+    <section class="menu" style="margin-right: 20px">
+      <h2>Enter expense data:</h2>
+      <form action="/expense/add" method="post">
+        <input id="amountInput" type="number" name="number" placeholder="Enter amount" min="0.01" step="0.01" required>
+        <input id="dateInput" type="date" name="date" value="{{ today }}" required>
+        <br><br>
+        <label for="payment" style="font-size: calc(1.275rem + .3vw);">Payment method</label>
+        <select name="payment" id="payment">
+          {% for i in payment %}
+            <option value="{{ i.id }}">{{ i.name }}</option>
+          {% endfor %}
+        </select>
+        <br><br>
+
+        <label for="category" style="font-size: calc(1.275rem + .3vw);">Select category</label>
+        <select name="category" id="category">
+          {% for i in expense %}
+            <option value="{{ i.id }}">{{ i.name }}</option>
+          {% endfor %}
+        </select>
+        <br><br>
+        <input class="comment" type="text" name="comment" placeholder="Enter comment (optional)">
+        <br><br>
+        <button type="submit" class="btn btn-primary add-income-btn">Add expense</button>
+        <div>
+          <a href="/expense/show">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="menu" style="margin-right: 20px">
+      <div>
+        <h2>Limit <span style="font-size: medium;">(optional)</span></h2>
+      </div>
+
+      <div style="border-radius: 20px; margin-bottom: 20px; background-color: #e7cbcb;">
+        <p id="limitSet" style="color: #643843; padding: 10px; margin-bottom: 0;"></p>
+      </div>
+
+      <div style="border-radius: 20px; margin-bottom: 20px; background-color: #e7cbcb;">
+        <p id="spent" style="color: #643843; padding: 10px; margin-bottom: 0;"></p>
+      </div>
+
+      <div style="border-radius: 20px; margin-bottom: 20px; background-color: #e7cbcb;">
+        <p id="left" style="color: #643843; padding: 10px; margin-bottom: 0;"></p>
+      </div>
+
+    </section>
+  </main>
+  <script src="/js/url.js"></script>
+  <script src="/js/limit.js"></script>
+{% endblock %}

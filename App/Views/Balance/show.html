@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}Balance{% endblock %}
+
+{% block body %}
+  <main>
+    <article>
+
+      <section class="menu" style="margin-right: 20px">
+        <h2>Balance review:</h2>
+        <form action="/balance/showBalance" method="post">
+          <fieldset>
+            <legend>Select period</legend>
+            <div>
+              <input type="radio" id="current-month" name="period" value="current-month" {% if period == "current-month" %} checked {% endif %}>
+              <label for="current-month">Current month</label>
+              <br>
+              <input type="radio" id="previous-month" name="period" value="previous-month" {% if period == "previous-month" %} checked {% endif %}>
+              <label for="previous-month">Previous month</label>
+              <br>
+              <input type="radio" id="current-year" name="period" value="current-year" {% if period == "current-year" %} checked {% endif %}>
+              <label for="current-year">Current year</label>
+              <br>
+            </div>
+
+            <div class="other-period">
+              <input type="radio" id="other" name="period" value="other-period" {% if period == NULL or period == "other-period" %} checked {% endif %}>
+              <label for="other">Other period</label>
+              <br>
+              <p>From:</p>
+              <input type="date" name="from" id="from"
+              {% if from %}
+                value="{{ from }}"
+              {% endif %}
+              >
+              <br>
+              <p>To:</p>
+              <input type="date" name="to" id="to"
+              {% if to %}
+                value="{{ to }}"
+              {% endif %}
+              >
+            </div>
+
+            <button type="submit" class="btn btn-primary">Show balance</button>
+      
+          </fieldset>
+        </form>
+      </section>
+
+      {% if period %}
+        <section class="menu balance">
+          {% if period == "current-month" %}
+          <h2>Current month balance:</h2>
+          {% elseif period == "previous-month" %}
+          <h2>Previous month balance:</h2>
+          {% elseif period == "current-year" %}
+          <h2>Current year balance:</h2>
+          {% else %}
+          <h2>Selected period balance:</h2>
+          {% endif %}
+
+          <div class="incomes-expenses">
+            <h3>Incomes</h3>
+            {% for i in incomesSum %}
+              <h4>{{ i.income_name }}: {{ i.Sum }}</h4>
+              {% for j in incomes %}
+                {% if j.income_name == i.income_name %}
+                  <p style="margin-bottom: 0;">{{ j.date_of_income }} {{j.amount }} {{ j.income_comment }}</p>
+                  <form action="/balance/saveEditedIncome" method="post" style="display: inline-block;">
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModalIncome{{ j.id }}" style="margin-right: 20px;">Edit</button>
+                    <!-- Modal -->
+                    <div id="editModalIncome{{ j.id }}" class="modal fade" tabindex="-1" aria-labelledby="editModalIncome{{ j.id }}Label" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header" style="background-color: #e7cbcb;">
+                            <h5 class="modal-title" id="editModalIncome{{ j.id }}Label" style="color: #643843;">Edit income</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body" style="background-color: #dbdfaa;">
+                            <div class="menu">
+                              <input type="number" name="number" value="{{ j.amount }}" min="0.01" step="0.01" required>
+                              <input type="date" name="date" value="{{ j.date_of_income }}" required>
+                              <br>
+                              <label for="incomesCategory{{ j.id }}" style="font-size: calc(1.275rem + .3vw);">Select category</label>
+                              <select name="category" id="incomesCategory{{ j.id }}" style="width: 250px; margin-top: 15px;">
+                                {% for h in incomesCategories %}
+                                  <option value="{{ h.id }}" {% if j.income_name == h.name %} selected {% endif %}>{{ h.name }}</option>
+                                {% endfor %}
+                              </select>
+                              <br>
+                              <input class="comment" type="text" name="comment" {% if j.income_comment != "" %} value="{{ j.income_comment }}" {% else %} placeholder="Enter comment (optional)" {% endif %}>
+                              <br><br>
+                            </div>
+                          </div>
+                          <div class="modal-footer" style="background-color: #e7cbcb;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                              <input type="hidden" name="period" value="{{ period }}">
+                              {% if from %}
+                              <input type="hidden" name="from" value="{{ from }}">
+                              <input type="hidden" name="to" value="{{ to }}">
+                              {% endif %}
+                            <button type="submit" name="income_id" value="{{ j.id }}" class="btn btn-primary">Save</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+
+                  <form action="/balance/deleteIncome" method="post" style="display: inline-block; margin: 10px 0 20px;">
+                    <input type="hidden" name="period"
+                    {% if period == "current-month" %}
+                      value="current-month"
+                    {% elseif period == "previous-month" %}
+                      value="previous-month"
+                    {% elseif period == "current-year" %}
+                      value="current-year"
+                    {% else %}
+                      value="other-period"
+                    {% endif %}
+                    >
+                    {% if period == "other-period" %}
+                      <input type="hidden" name="from" value="{{ from }}">
+                      <input type="hidden" name="to" value="{{ to }}">
+                    {% endif %}
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModalIncome{{ j.id }}">Delete</button>
+                    <!-- Modal -->
+                    <div id="deleteModalIncome{{ j.id }}" class="modal fade" tabindex="-1" aria-labelledby="deleteModalIncome{{ j.id }}Label" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header" style="background-color: #e7cbcb;">
+                            <h5 class="modal-title" id="deleteModalIncome{{ j.id }}Label" style="color: #643843;">Delete income</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body" style="background-color: #dbdfaa">
+                            <p style="color: #643843;">Are you sure you want to delete?</p>
+                          </div>
+                          <div class="modal-footer" style="background-color: #e7cbcb;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" name="income_id" value="{{ j.id }}" class="btn btn-danger">Delete</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                {% endif %}
+              {% endfor %}
+            {% endfor %}
+          </div>
+
+          <div class="incomes-expenses">
+            <h3>Expenses</h3>
+            {% for i in expensesSum %}
+              <h4>{{ i.expense_name }}: {{ i.Sum}}</h4>
+              {% for j in expenses %}
+                {% if j.expense_name == i.expense_name %}
+                  <p style="margin-bottom: 0;">{{ j.date_of_expense }} {{j.amount }} {{ j.expense_comment }}</p>
+                  <form action="/balance/saveEditedExpense" method="post" style="display: inline-block;">
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModalExpense{{ j.id }}" style="margin-right: 20px;">Edit</button>
+                    <!-- Modal -->
+                    <div id="editModalExpense{{ j.id }}" class="modal fade" tabindex="-1" aria-labelledby="editModalExpense{{ j.id }}Label" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header" style="background-color: #e7cbcb;">
+                            <h5 class="modal-title" id="editModalExpense{{ j.id }}Label" style="color: #643843;">Edit expense</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body" style="background-color: #dbdfaa;">
+                            <div class="menu">
+                              <input type="number" name="number" value="{{ j.amount }}" min="0.01" step="0.01" required>
+                              <input type="date" name="date" value="{{ j.date_of_expense }}" required>
+                              <br>
+                              <label for="payment{{ j.id }}" style="font-size: calc(1.275rem + .3vw);">Payment method</label>
+                              <select name="payment" id="payment{{ j.id }}" style="width: 250px; margin-top: 15px;">
+                                {% for h in payment %}
+                                  <option value="{{ h.id }}" {% if j.name == h.name %} selected {% endif %}>{{ h.name }}</option>
+                                {% endfor %}
+                              </select>
+                              <br>
+                              <label for="expensesCategory{{ j.id }}" style="font-size: calc(1.275rem + .3vw);">Select category</label>
+                              <select name="category" id="expensesCategory{{ j.id }}" style="width: 250px; margin-top: 15px;">
+                                {% for h in expensesCategories %}
+                                  <option value="{{ h.id }}" {% if j.expense_name == h.name %} selected {% endif %}>{{ h.name }}</option>
+                                {% endfor %}
+                              </select>
+                              <br>
+                              <input class="comment" type="text" name="comment" {% if j.expense_comment != "" %} value="{{ j.expense_comment }}" {% else %} placeholder="Enter comment (optional)" {% endif %}>
+                              <br><br>
+                            </div>
+                          </div>
+                          <div class="modal-footer" style="background-color: #e7cbcb;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                              <input type="hidden" name="period" value="{{ period }}">
+                              {% if from %}
+                              <input type="hidden" name="from" value="{{ from }}">
+                              <input type="hidden" name="to" value="{{ to }}">
+                              {% endif %}
+                            <button type="submit" name="expense_id" value="{{ j.id }}" class="btn btn-primary">Save</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+
+                  <form action="/balance/deleteExpense" method="post" style="display: inline-block; margin: 10px 0 20px;">
+                    <input type="hidden" name="period" {% if period == "current-month" %}
+                      value="current-month"
+                    {% elseif period == "previous-month" %}
+                      value="previous-month"
+                    {% elseif period == "current-year" %}
+                      value="current-year"
+                    {% else %}
+                      value="other-period"
+                    {% endif %}
+                    >
+                    {% if period == "other-period" %}
+                      <input type="hidden" name="from" value="{{ from }}">
+                      <input type="hidden" name="to" value="{{ to }}">
+                    {% endif %}
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModalExpense{{ j.id }}">Delete</button>
+                    <!-- Modal -->
+                    <div id="deleteModalExpense{{ j.id }}" class="modal fade" tabindex="-1" aria-labelledby="deleteModalExpense{{ j.id }}Label" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header" style="background-color: #e7cbcb;">
+                            <h5 class="modal-title" id="deleteModalExpense{{ j.id }}Label" style="color: #643843;">Delete expense</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body" style="background-color: #dbdfaa">
+                            <p style="color: #643843;">Are you sure you want to delete?</p>
+                          </div>
+                          <div class="modal-footer" style="background-color: #e7cbcb;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" name="expense_id" value="{{ j.id }}" class="btn btn-danger">Delete</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                {% endif %}
+              {% endfor %}
+            {% endfor %}
+          </div>
+
+          <div class="incomes-expenses">
+            <h3>Balance: {{ balance }}</h3>
+            {% if balance < 0 %}
+              <p class="notgood">Attention! Your expenses are larger than your incomes. Try to manage your finances more responsibly.</p>
+            {% else %}
+              <p class="good">Congratulations! You manage your finances very well.</p>
+            {% endif %}
+          </div>
+
+          <div class="incomes-expenses">
+            <h3>Your expenses</h3>
+            <div id="piechart_3d"></div>
+          </div>
+          
+        </section>
+      {% endif %}
+
+    </article>
+  </main>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load("current", {packages:["corechart"]});
+    google.charts.setOnLoadCallback(drawChart);
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable([
+        ['Category', 'Money'],
+
+        {% for i in expensesSum %}
+          {{ "['" }} {{ i.expense_name }} {{ "'," }} {{ i.Sum }} {{ "]," }}
+        {% endfor %}
+      ]);
+
+      var options = {
+        is3D: true,
+        backgroundColor: '#643843',
+        legend: {
+          textStyle: {
+            color: '#e7cbcb'
+          }
+        }
+      };
+
+      var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+      chart.draw(data, options);
+    }
+  </script>
+{% endblock %}

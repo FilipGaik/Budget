@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Add income{% endblock %}
+
+{% block body %}
+  <main>
+    <section class="menu">
+      <h2>Enter income data:</h2>
+      <form action="/income/add" method="post">
+        <input type="number" name="number" placeholder="Enter amount" min="0.01" step="0.01" required>
+        <input type="date" name="date" value="{{ today }}" required>
+        <br><br>
+        <label for="category" style="font-size: calc(1.275rem + .3vw);">Select category</label>
+        <select name="category" id="category">
+          {% for i in income %}
+            <option value="{{ i.id }}">{{ i.name }}</option>
+          {% endfor %}
+        </select>
+        <br><br>
+        <input class="comment" type="text" name="comment" placeholder="Enter comment (optional)">
+        <br><br>
+        <button type="submit" class="btn btn-primary add-income-btn">Add income</button>
+        <div>
+          <a href="/income/show">Cancel</a>
+        </div>
+
+        <!-- deleted because Paweł didn't like it
+        <fieldset>
+          <legend>Select category</legend>
+          <div>
+            {% for i in income %}
+              <input type="radio" id={{ i.name }} name="category" value={{ i.id }} checked>
+              <label for={{ i.name }}>{{ i.name }}</label>
+              <br>
+            {% endfor %}
+            <br>
+            <input class="comment" type="text" name="comment" placeholder="Enter comment (optional)">
+            <br><br>
+            <button type="submit" class="btn btn-primary add-income-btn">Add income</button>
+            <div class="add-income-btn">
+              <a class="add-income-btn" href="/income/show">Cancel</a>
+            </div>
+          </div>
+        </fieldset>
+        -->
+      </form>
+    </section>
+  </main>
+{% endblock %}
