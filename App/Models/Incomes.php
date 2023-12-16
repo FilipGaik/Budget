@@ -13,6 +13,7 @@ use Core\View;
 class Incomes extends \Core\Model {
   /**
    * Get incomes categories assigned to user
+   * @param integer $user_id User ID
    * 
    * @return mixed Incomes object if found, false otherwise
    */
@@ -31,6 +32,11 @@ class Incomes extends \Core\Model {
 
   /**
    * Add income to incomes table
+   * @param integer $user_id User ID
+   * @param integer $income_category_assigned_to_user_id Income category
+   * @param float $amount Amount
+   * @param date $date_of_income Date
+   * @param string $income_comment Comment
    * 
    * @return boolean True if the income was added, false otherwise
    */
