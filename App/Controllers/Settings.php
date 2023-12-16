@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use PDO;
 use \Core\View;
-use \App\Models\User;
+use \App\Models\SettingsModel;
 use \App\Auth;
 use \App\Flash;
 
@@ -31,61 +31,12 @@ class Settings extends Authenticated {
    * @return void
    */
   public function showAction() {
-    View::renderTemplate('Settings/show.html', ['user' => $this->user, 'incomesCategories' => $this->getIncomesCategories(), 'expensesCategories' => $this->getExpensesCategories(), 'paymentMethods' => $this->getPaymentMethods()]);
-  }
-
-  /**
-   * Get incomes categories assigned to user
-   * 
-   * @return mixed Incomes object if found, false otherwise
-   */
-  public function getIncomesCategories() {
-    $sql = 'SELECT * FROM incomes_category_assigned_to_users WHERE user_id = :id';
-    
-    $db = User::getDB();
-    
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':id', $_SESSION['user_id'], PDO::PARAM_INT);
-    
-    $stmt->execute();
-    
-    return $stmt->fetchAll();
-  }
-
-  /**
-   * Get expenses categories assigned to user
-   * 
-   * @return mixed Expenses object if found, false otherwise
-   */
-  public function getExpensesCategories() {
-    $sql = 'SELECT * FROM expenses_category_assigned_to_users WHERE user_id = :id';
-    
-    $db = User::getDB();
-    
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':id', $_SESSION['user_id'], PDO::PARAM_INT);
-    
-    $stmt->execute();
-    
-    return $stmt->fetchAll();
-  }
-
-  /**
-   * Get payment methods assigned to user
-   * 
-   * @return mixed Payment object if found, false otherwise
-   */
-  public function getPaymentMethods() {
-    $sql = 'SELECT * FROM payment_methods_assigned_to_users WHERE user_id = :id';
-    
-    $db = User::getDB();
-    
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':id', $_SESSION['user_id'], PDO::PARAM_INT);
-    
-    $stmt->execute();
-    
-    return $stmt->fetchAll();
+    View::renderTemplate('Settings/show.html', [
+      'user' => $this->user, 
+      'incomesCategories' => SettingsModel::getIncomesCategories($_SESSION['user_id']), 
+      'expensesCategories' => SettingsModel::getExpensesCategories($_SESSION['user_id']), 
+      'paymentMethods' => SettingsModel::getPaymentMethods($_SESSION['user_id'])
+    ]);
   }
 
   /**
@@ -100,7 +51,7 @@ class Settings extends Authenticated {
 
     } else {
 
-      $incomesCategories = $this->getIncomesCategories();
+      $incomesCategories = SettingsModel::getIncomesCategories($_SESSION['user_id']);
       $incomeCategoryExists = false;
 
       foreach($incomesCategories as $incomeCategory) {
@@ -115,7 +66,7 @@ class Settings extends Authenticated {
         
       if(!$incomeCategoryExists) {
 
-        if ($this->addIncomeCategoryToTable()) {
+        if (SettingsModel::addIncomeCategoryToTable($_SESSION['user_id'], $_POST['incomeCategory'])) {
 
           Flash::addMessage('Income category added');
     
@@ -130,24 +81,6 @@ class Settings extends Authenticated {
   }
 
   /**
-   * Add new income category to incomes_category_assigned_to_users table
-   * 
-   * @return boolean True if the income category was added, false otherwise
-   */
-  private function addIncomeCategoryToTable() {
-    $sql = 'INSERT INTO incomes_category_assigned_to_users (user_id, name)
-            VALUES (:user_id, :name);';
-
-    $db = User::getDB();
-        
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
-    $stmt->bindValue(':name', $_POST['incomeCategory'], PDO::PARAM_STR);    
-
-    return $stmt->execute();
-  }
-
-  /**
    * Add new expense category
    * 
    * @return void
@@ -159,7 +92,7 @@ class Settings extends Authenticated {
 
     } else {
 
-      $expensesCategories = $this->getExpensesCategories();
+      $expensesCategories = SettingsModel::getExpensesCategories($_SESSION['user_id']);
       $expenseCategoryExists = false;
 
       foreach($expensesCategories as $expenseCategory) {
@@ -174,7 +107,7 @@ class Settings extends Authenticated {
         
       if(!$expenseCategoryExists) {
 
-        if ($this->addExpenseCategoryToTable()) {
+        if (SettingsModel::addExpenseCategoryToTable($_SESSION['user_id'], $_POST['expenseCategory'])) {
 
           Flash::addMessage('Expense category added');
     
@@ -189,24 +122,6 @@ class Settings extends Authenticated {
   }
 
   /**
-   * Add new expense category to expenses_category_assigned_to_users table
-   * 
-   * @return boolean True if the expense category was added, false otherwise
-   */
-  private function addExpenseCategoryToTable() {
-    $sql = 'INSERT INTO expenses_category_assigned_to_users (user_id, name)
-            VALUES (:user_id, :name);';
-
-    $db = User::getDB();
-        
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
-    $stmt->bindValue(':name', $_POST['expenseCategory'], PDO::PARAM_STR);    
-
-    return $stmt->execute();
-  }
-
-  /**
    * Add new payment method
    * 
    * @return void
@@ -218,7 +133,7 @@ class Settings extends Authenticated {
 
     } else {
 
-      $paymentMethods = $this->getPaymentMethods();
+      $paymentMethods = SettingsModel::getPaymentMethods($_SESSION['user_id']);
       $paymentMethodExists = false;
 
       foreach($paymentMethods as $paymentMethod) {
@@ -233,7 +148,7 @@ class Settings extends Authenticated {
         
       if(!$paymentMethodExists) {
 
-        if ($this->addPaymentToTable()) {
+        if (SettingsModel::addPaymentToTable($_SESSION['user_id'], $_POST['payment'])) {
 
           Flash::addMessage('Payment method added');
     
@@ -248,24 +163,6 @@ class Settings extends Authenticated {
   }
 
   /**
-   * Add new payment method to payment_methods_assigned_to_users table
-   * 
-   * @return boolean True if the payment method was added, false otherwise
-   */
-  private function addPaymentToTable() {
-    $sql = 'INSERT INTO payment_methods_assigned_to_users (user_id, name)
-            VALUES (:user_id, :name);';
-
-    $db = User::getDB();
-        
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
-    $stmt->bindValue(':name', $_POST['payment'], PDO::PARAM_STR);    
-
-    return $stmt->execute();
-  }
-
-  /**
    * Rename income category
    * 
    * @return void
@@ -277,7 +174,7 @@ class Settings extends Authenticated {
 
     } else {
 
-      $incomesCategories = $this->getIncomesCategories();
+      $incomesCategories = SettingsModel::getIncomesCategories($_SESSION['user_id']);
       $incomeCategoryExists = false;
 
       foreach($incomesCategories as $incomeCategory) {
@@ -292,7 +189,7 @@ class Settings extends Authenticated {
         
       if(!$incomeCategoryExists) {
 
-        if ($this->renameIncomeCategoryInTable()) {
+        if (SettingsModel::renameIncomeCategoryInTable($_POST['incomeCategory'], $_POST['incomeCategoryId'])) {
 
           Flash::addMessage('Income category renamed');
     
@@ -307,25 +204,6 @@ class Settings extends Authenticated {
   }
 
   /**
-   * Rename income category in incomes_category_assigned_to_users table
-   * 
-   * @return boolean True if the income category was renamed, false otherwise
-   */
-  private function renameIncomeCategoryInTable() {
-    $sql = 'UPDATE incomes_category_assigned_to_users
-            SET name = :name
-            WHERE incomes_category_assigned_to_users.id = :id;';
-
-    $db = User::getDB();
-        
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':name', $_POST['incomeCategory'], PDO::PARAM_STR);
-    $stmt->bindValue(':id', $_POST['incomeCategoryId'], PDO::PARAM_INT);    
-
-    return $stmt->execute();
-  }
-
-  /**
    * Rename expense category or and turn on or off monthly limit for expense category
    * 
    * @return void
@@ -337,7 +215,7 @@ class Settings extends Authenticated {
 
     } else {
 
-      $expensesCategories = $this->getExpensesCategories();
+      $expensesCategories = SettingsModel::getExpensesCategories($_SESSION['user_id']);
       $expenseCategoryExists = false;
 
       foreach($expensesCategories as $expenseCategory) {
@@ -356,7 +234,9 @@ class Settings extends Authenticated {
         
       if(!$expenseCategoryExists) {
 
-        if ($this->updateExpenseCategoryInTable()) {
+        $limitAmount = isset($_POST['limitOn']) ? $_POST['limitAmount'] : '0';
+
+        if (SettingsModel::updateExpenseCategoryInTable($_POST['expenseCategory'], $limitAmount, $_POST['expenseCategoryId'])) {
 
           Flash::addMessage('Expense category updated');
     
@@ -371,30 +251,6 @@ class Settings extends Authenticated {
   }
 
   /**
-   * Rename expense category or and turn on or off monthly limit for expense category in expenses_category_assigned_to_users table
-   * 
-   * @return boolean True if the expense category was updated, false otherwise
-   */
-  private function updateExpenseCategoryInTable() {
-    $sql = 'UPDATE expenses_category_assigned_to_users
-            SET name = :name, `limit` = :limitAmount
-            WHERE expenses_category_assigned_to_users.id = :id;';
-
-    $db = User::getDB();
-        
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':name', $_POST['expenseCategory'], PDO::PARAM_STR);
-    if(isset($_POST['limitOn'])) {
-      $stmt->bindValue(':limitAmount', $_POST['limitAmount'], PDO::PARAM_STR);
-    } else {
-      $stmt->bindValue(':limitAmount', 0, PDO::PARAM_INT);
-    }
-    $stmt->bindValue(':id', $_POST['expenseCategoryId'], PDO::PARAM_INT);
-
-    return $stmt->execute();
-  }
-
-  /**
    * Rename payment method
    * 
    * @return void
@@ -406,7 +262,7 @@ class Settings extends Authenticated {
 
     } else {
 
-      $paymentMethods = $this->getPaymentMethods();
+      $paymentMethods = SettingsModel::getPaymentMethods($_SESSION['user_id']);
       $paymentMethodExists = false;
 
       foreach($paymentMethods as $paymentMethod) {
@@ -421,7 +277,7 @@ class Settings extends Authenticated {
         
       if(!$paymentMethodExists) {
 
-        if ($this->renamePaymentInTable()) {
+        if (SettingsModel::renamePaymentInTable($_POST['payment'], $_POST['paymentId'])) {
 
           Flash::addMessage('Payment method renamed');
     
@@ -436,42 +292,12 @@ class Settings extends Authenticated {
   }
 
   /**
-   * Rename payment method in payment_methods_assigned_to_users table
-   * 
-   * @return boolean True if the payment method was renamed, false otherwise
-   */
-  private function renamePaymentInTable() {
-    $sql = 'UPDATE payment_methods_assigned_to_users
-            SET name = :name
-            WHERE payment_methods_assigned_to_users.id = :id;';
-
-    $db = User::getDB();
-        
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':name', $_POST['payment'], PDO::PARAM_STR);
-    $stmt->bindValue(':id', $_POST['paymentId'], PDO::PARAM_INT);    
-
-    return $stmt->execute();
-  }
-
-  /**
    * Delete income category
    * 
    * @return void
    */
   public function deleteIncomeCategoryAction() {
-    $sql = 'DELETE FROM incomes
-            WHERE income_category_assigned_to_user_id = :id;
-            DELETE FROM incomes_category_assigned_to_users 
-            WHERE id = :id;
-            ';
-
-    $db = User::getDB();
-                
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':id', $_POST['incomeCategoryId'], PDO::PARAM_INT);
-
-    $stmt->execute();
+    SettingsModel::deleteIncomeCategory($_POST['incomeCategoryId']);
 
     Flash::addMessage('Income category deleted');
 
@@ -484,17 +310,7 @@ class Settings extends Authenticated {
    * @return void
    */
   public function deleteExpenseCategoryAction() {
-    $sql = 'DELETE FROM expenses
-            WHERE expense_category_assigned_to_user_id = :id;
-            DELETE FROM expenses_category_assigned_to_users 
-            WHERE id = :id;';
-
-    $db = User::getDB();
-                
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':id', $_POST['expenseCategoryId'], PDO::PARAM_INT);
-
-    $stmt->execute();
+    SettingsModel::deleteExpenseCategory($_POST['expenseCategoryId']);
 
     Flash::addMessage('Expense category deleted');
 
@@ -507,17 +323,7 @@ class Settings extends Authenticated {
    * @return void
    */
   public function deletePaymentMethodAction() {
-    $sql = 'DELETE FROM expenses
-            WHERE payment_method_assigned_to_user_id = :id;
-            DELETE FROM payment_methods_assigned_to_users 
-            WHERE id = :id;';
-
-    $db = User::getDB();
-                
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':id', $_POST['paymentMethodId'], PDO::PARAM_INT);
-
-    $stmt->execute();
+    SettingsModel::deletePaymentMethod($_POST['paymentMethodId']);
 
     Flash::addMessage('Payment method deleted');
 
@@ -530,26 +336,8 @@ class Settings extends Authenticated {
    * @return void
    */
   public function deleteAccountAction() {
-    $sql = 'DELETE FROM expenses
-            WHERE user_id = :id;
-            DELETE FROM expenses_category_assigned_to_users 
-            WHERE user_id = :id;
-            DELETE FROM incomes
-            WHERE user_id = :id;
-            DELETE FROM incomes_category_assigned_to_users 
-            WHERE user_id = :id;
-            DELETE FROM payment_methods_assigned_to_users 
-            WHERE user_id = :id;
-            DELETE FROM users
-            WHERE id = :id;';
-
-    $db = User::getDB();
-                
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':id', $_SESSION['user_id'], PDO::PARAM_INT);
-
-    $stmt->execute();
-    
+    SettingsModel::deleteAccount($_SESSION['user_id']);
+  
     Auth::logout();
     
     $this->redirect('/');
@@ -561,20 +349,7 @@ class Settings extends Authenticated {
    * @return void
    */
   public function getExpenses() {
-    $sql = 'SELECT expense_category_assigned_to_user_id, payment_method_assigned_to_user_id
-            FROM expenses
-            WHERE user_id = :id;';
-
-    $db = User::getDB();
-        
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':id', $_SESSION['user_id'], PDO::PARAM_INT);
-
-    $stmt->execute();
-
-    $arr = $stmt->fetchAll();
-
-    echo json_encode($arr, JSON_UNESCAPED_UNICODE);
+    echo json_encode(SettingsModel::getExpenses($_SESSION['user_id']), JSON_UNESCAPED_UNICODE);
   }
 
   /**
@@ -583,19 +358,6 @@ class Settings extends Authenticated {
    * @return void
    */
   public function getIncomes() {
-    $sql = 'SELECT income_category_assigned_to_user_id
-            FROM incomes
-            WHERE user_id = :id;';
-
-    $db = User::getDB();
-        
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(':id', $_SESSION['user_id'], PDO::PARAM_INT);
-
-    $stmt->execute();
-
-    $arr = $stmt->fetchAll();
-
-    echo json_encode($arr, JSON_UNESCAPED_UNICODE);
+    echo json_encode(SettingsModel::getIncomes($_SESSION['user_id']), JSON_UNESCAPED_UNICODE);
   }
 }
