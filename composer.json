@@ -1,0 +1,21 @@
+{
+    "require": {
+        "twig/twig": "^3.0",
+        "phpmailer/phpmailer": "~5.2",
+        "mailgun/mailgun-php": "^3.5",
+        "php-http/guzzle6-adapter": "^2.0",
+        "php-http/message": "^1.16",
+        "http-interop/http-factory-guzzle": "^1.2"
+    },
+	"autoload": {
+		"psr-4": {
+			"Core\\": "Core/",
+			"App\\": "App/"
+		}
+	},
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+}
