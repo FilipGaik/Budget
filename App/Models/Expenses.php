@@ -37,7 +37,7 @@ class Expenses extends \Core\Model {
   public static function getPaymentMethods($user_id) {
     $sql = 'SELECT * FROM payment_methods_assigned_to_users WHERE user_id = :id';
     
-    $db = User::getDB();
+    $db = static::getDB();
     
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
@@ -105,7 +105,7 @@ class Expenses extends \Core\Model {
             FROM expenses
             WHERE user_id = :id;';
     
-    $db = User::getDB();
+    $db = static::getDB();
     
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
