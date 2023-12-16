@@ -13,6 +13,7 @@ use Core\View;
 class Expenses extends \Core\Model {
   /**
    * Get expenses categories assigned to user
+   * @param integer $user_id User ID
    * 
    * @return mixed Expenses object if found, false otherwise
    */
@@ -31,6 +32,7 @@ class Expenses extends \Core\Model {
 
   /**
    * Get payment methods assigned to user
+   * @param integer $user_id User ID
    * 
    * @return mixed Payment object if found, false otherwise
    */
@@ -49,6 +51,12 @@ class Expenses extends \Core\Model {
 
   /**
    * Add expense to expense table
+   * @param integer $user_id User ID
+   * @param integer $expense_category_assigned_to_user_id Expense category
+   * @param integer $payment_method_assigned_to_user_id Payment method
+   * @param float $amount Amount
+   * @param date $date_of_expense Date
+   * @param string $expense_comment Comment
    * 
    * @return boolean True if the expense was added, false otherwise
    */
@@ -78,6 +86,8 @@ class Expenses extends \Core\Model {
 
   /**
    * Get limit from expenses_category_assigned_to_users table for user and category
+   * @param integer $user_id User ID
+   * @param string $category Category name
    * 
    * @return array Limit
    */
@@ -97,6 +107,7 @@ class Expenses extends \Core\Model {
 
   /**
    * Get expense id, category name, amount and date
+   * @param integer $user_id User ID
    * 
    * @return array
    */
